@@ -5,6 +5,9 @@
 		<title>{{ .Post_title}}</title>
 	</head>
 	<body>
-		<h1>{{ .Post_content}}</h1>
+		<div>
+		  <h1>{{ .Post_title}}</h1>
+		  <div>{{ .Post_content}}</div>
+	  	</div>
 	</body>
 </html>
