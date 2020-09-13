@@ -15,12 +15,12 @@ func init() {
 }
 
 func initDefaultTemplate() (err error) {
-	defaultTemplate, err = template.New("List").Parse(
+	defaultTemplate, err = template.New("Post").Parse(
 		"<!doctype html>" +
 			"<html lang=en>" +
 			"<meta name=viewport content=\"width=device-width, initial-scale=1.0\">" +
-			"<title>Carlzberg</title>" +
-			"<h1>Hello World from Carlzberg</h1>" +
+			"<title>{{ .Post_title}}</title>" +
+			"<h1>{{ .Post_content}}</h1>" +
 			"</html>")
 	return
 }

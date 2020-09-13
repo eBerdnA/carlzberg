@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/viper"
 )
 
@@ -20,6 +21,18 @@ func main() {
 	if !viper.IsSet("dbPath") {
 		log.Fatal("No database path (dbPath) is configured.")
 	}
+
+	var err error
+	db, err = sql.Open("sqlite3", viper.GetString("dbPath"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	migrateDatabase()
+
+	defer func() {
+		_ = db.Close()
+	}()
 
 	r := mux.NewRouter()
 	r.HandleFunc("/", CatchAllHandler)
@@ -35,14 +48,22 @@ func CatchAllHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func DefaultHandler(w http.ResponseWriter, r *http.Request) {
-	type row struct {
-		Slug string
-		Url  string
-		Hits int
+	type post_type struct {
+		Id           int
+		Post_title   string
+		Post_content string
 	}
-	// var list []row
-	// entry := row{Slug: "demo", Url: "http://heise.de",Hits: 0}
-	// list = append(list, entry)
-	defaultTemplate.Execute(w, nil)
+	var post post_type
+	err := db.QueryRow("SELECT id, post_title, post_content FROM posts WHERE post_title = ?", "Hello World from Carlzberg").Scan(&post.Id, &post.Post_title, &post.Post_content)
+	if err != nil {
+		http.NotFound(w, r)
+		log.Fatal(err)
+		return
+	}
 
+	err = defaultTemplate.Execute(w, &post)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
