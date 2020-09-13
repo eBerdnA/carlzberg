@@ -10,6 +10,8 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/viper"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 var db *sql.DB
@@ -37,16 +39,17 @@ func main() {
 	log.Print("starting")
 
 	var err error
-	db, err = sql.Open("sqlite3", viper.GetString("dbPath"))
+	// db, err = sql.Open("sqlite3", viper.GetString("dbPath"))
+	db, err := gorm.Open(sqlite.Open(viper.GetString("dbPath")), &gorm.Config{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	migrateDatabase()
+	db.AutoMigrate(&Post{})
 
-	defer func() {
-		_ = db.Close()
-	}()
+	// defer func() {
+	// 	_ = db.Close()
+	// }()
 
 	r := mux.NewRouter()
 	r.HandleFunc("/", CatchAllHandler)
@@ -62,12 +65,8 @@ func CatchAllHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func DefaultHandler(w http.ResponseWriter, r *http.Request) {
-	type post_type struct {
-		Id           int
-		Post_title   string
-		Post_content string
-	}
-	var post post_type
+
+	var post Post
 	err := db.QueryRow("SELECT id, post_title, post_content FROM posts WHERE post_title = ?", "Hello World from Carlzberg").Scan(&post.Id, &post.Post_title, &post.Post_content)
 	if err != nil {
 		http.NotFound(w, r)
