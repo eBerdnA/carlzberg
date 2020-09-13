@@ -1,13 +1,16 @@
 package main
 
 import (
+	"github.com/spf13/viper"
 	"html/template"
 	"log"
+	"path"
 )
 
 var defaultTemplate *template.Template
 
 func init() {
+	log.Print("init of templates")
 	if initDefaultTemplate() != nil {
 		log.Fatal("Failed to initialize templates")
 		return
@@ -15,12 +18,13 @@ func init() {
 }
 
 func initDefaultTemplate() (err error) {
-	defaultTemplate, err = template.New("Post").Parse(
-		"<!doctype html>" +
-			"<html lang=en>" +
-			"<meta name=viewport content=\"width=device-width, initial-scale=1.0\">" +
-			"<title>{{ .Post_title}}</title>" +
-			"<h1>{{ .Post_content}}</h1>" +
-			"</html>")
+	tplDirectory := viper.GetViper().GetString("templatePath")
+	defaultTemplatePath := path.Join(tplDirectory, "default")
+	log.Print(defaultTemplatePath)
+	defaultTemplate, err = template.ParseFiles(defaultTemplatePath)
+	if err != nil {
+		log.Print(err)
+		return
+	}
 	return
 }

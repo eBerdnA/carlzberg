@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang=en>
+	<meta name=viewport content="width=device-width, initial-scale=1.0">
+	<head>
+		<title>{{ .Post_title}}</title>
+	</head>
+	<body>
+		<h1>{{ .Post_content}}</h1>
+	</body>
+</html>

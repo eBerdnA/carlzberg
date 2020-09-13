@@ -13,14 +13,28 @@ import (
 )
 
 var db *sql.DB
+var _viper *viper.Viper
 
-func main() {
-	viper.SetDefault("dbPath", "data/goshort.db")
-	viper.SetDefault("port", 8080)
+func init() {
+	log.Print("init of main")
+	_viper := viper.GetViper()
+	_viper.SetDefault("dbPath", "data/goshort.db")
+	_viper.SetDefault("port", 8080)
+	_viper.SetDefault("templatePath", "templates")
 
-	if !viper.IsSet("dbPath") {
+	if !_viper.IsSet("dbPath") {
 		log.Fatal("No database path (dbPath) is configured.")
 	}
+
+	if !_viper.IsSet("templatePath") {
+		log.Fatal("No template path (templatePath) is configured.")
+	}
+
+	log.Print("viper initialized")
+}
+
+func main() {
+	log.Print("starting")
 
 	var err error
 	db, err = sql.Open("sqlite3", viper.GetString("dbPath"))
